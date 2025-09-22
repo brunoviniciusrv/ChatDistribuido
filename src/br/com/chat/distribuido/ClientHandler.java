@@ -6,9 +6,6 @@ import java.io.*;
 import java.net.Socket;
 import java.util.stream.Collectors;
 
-/**
- * Gere a comunicação com um único cliente em uma thread dedicada.
- */
 public class ClientHandler extends Thread {
     private final Socket socket;
     private final DiscoveryServer server;
@@ -94,8 +91,19 @@ public class ClientHandler extends Thread {
                 break;
 
             case "GET_GROUP_MEMBERS":
-                if (parts.length == 2) {
-                    sendMessage("GROUP_MEMBERS::" + parts[1] + "::" + server.getGroupMembersAsString(Integer.parseInt(parts[1])));
+                if (parts.length == 2 && currentUser != null) {
+                    int groupId = Integer.parseInt(parts[1]);
+
+                    // --- VERIFICAÇÃO DE SEGURANÇA ---
+                    var groupOptional = server.getGroupRepository().findGroupById(groupId);
+
+                    if (groupOptional.isPresent() && groupOptional.get().getMembers().contains(currentUser.getUsername())) {
+                        // O usuário É membro, então pode prosseguir.
+                        sendMessage("GROUP_MEMBERS::" + groupId + "::" + server.getGroupMembersAsString(groupId));
+                    } else {
+                        // O usuário NÃO É membro ou o grupo não existe. Recusa o pedido.
+                        sendMessage("ERROR::Acesso negado. Você não é membro do grupo " + groupId + ".");
+                    }
                 }
                 break;
 

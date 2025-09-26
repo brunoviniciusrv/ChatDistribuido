@@ -12,4 +12,5 @@ public interface UserRepository {
     Optional<UserInfo> removeUser(String username);
     Optional<UserInfo> findUser(String username);
     Collection<UserInfo> getAllUsers();
+    boolean isIpPortInUse(String ip, int p2pPort);
 }

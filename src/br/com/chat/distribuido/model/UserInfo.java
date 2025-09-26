@@ -21,6 +21,7 @@ public class UserInfo {
     public String getUsername() { return username; }
     public String getIpAddress() { return ipAddress; }
     public int getP2pPort() { return p2pPort; }
+    public String getAddress() { return ipAddress; }    
 
     public void sendMessage(String message) {
         handler.sendMessage(message);

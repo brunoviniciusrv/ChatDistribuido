@@ -32,4 +32,10 @@ public class InMemoryUserRepository implements UserRepository {
     public Collection<UserInfo> getAllUsers() {
         return users.values();
     }
+
+    @Override
+    public boolean isIpPortInUse(String ip, int p2pPort) {
+        return users.values().stream()
+                .anyMatch(u -> u.getAddress().equals(ip) && u.getP2pPort() == p2pPort);
+    }
 }

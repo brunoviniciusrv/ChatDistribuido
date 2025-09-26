@@ -119,12 +119,22 @@ public class ClientHandler extends Thread {
 
     private void handleLogin(String username, int p2pPort) {
         String ip = socket.getInetAddress().getHostAddress();
-        this.currentUser = new UserInfo(username, ip, p2pPort, this);
-        boolean success = server.registerUser(this.currentUser);
-        if (!success) {
+
+        // Verifica se já existe usuário com mesmo IP e porta P2P
+        boolean portInUse = server.getUserRepository().isIpPortInUse(ip, p2pPort);
+
+        if (portInUse) {
+            sendMessage("ERROR::Já existe usuário usando este IP e porta P2P.");
+            sendMessage("INFO::Conexão não iniciada com servidor.");
+            try { socket.close(); } catch (IOException e) {}
+             return;
+        } else if (!server.registerUser(new UserInfo(username, ip, p2pPort, this))) {
             sendMessage("ERROR::Nome de usuário já em uso.");
-            this.currentUser = null;
+            sendMessage("INFO::Conexão não iniciada com servidor.");
+            try { socket.close(); } catch (IOException e) {}
+            return;
         } else {
+            this.currentUser = new UserInfo(username, ip, p2pPort, this);
             sendMessage("INFO::Login bem-sucedido.");
             System.out.println("Novo usuário logado: " + currentUser);
         }
